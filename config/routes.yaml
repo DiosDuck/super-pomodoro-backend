@@ -1,0 +1,25 @@
+controllers_health:
+    resource:
+        path: ../src/Health/Controller/
+        namespace: App\Health\Controller
+    type: attribute
+
+controllers_auth:
+    resource:
+        path: ../src/Authentication/Controller/
+        namespace: App\Authentication\Controller
+    type: attribute
+
+controllers_pomodoro:
+    resource:
+        path: ../src/Pomodoro/Controller
+        namespace: App\Pomodoro\Controller
+    type: attribute
+
+# login path
+api_auth_login:
+    path: /api/auth/login
+
+# logout path
+api_auth_logout:
+    path: /api/auth/logout

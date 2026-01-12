@@ -1,0 +1,54 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: My App
+            description: This is an awesome app!
+            version: 1.0.0
+        paths:
+            /api/auth/login:
+                post:
+                    tags: [Authentication]
+                    summary: Login use
+                    requestBody:
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    properties:
+                                        username:
+                                            type: string
+                                            example: username
+                                        password:
+                                            type: string
+                                            example: password
+                    responses:
+                        '200':
+                            description: User is logged out
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            token:
+                                                type: string
+                        '401':
+                            description: Invalid credentials
+            /api/auth/logout:
+                post:
+                    tags: [Authentication]
+                    summary: Logout use
+                    security:
+                        - Bearer: []
+                    responses:
+                        '200':
+                            description: User is logged out
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
