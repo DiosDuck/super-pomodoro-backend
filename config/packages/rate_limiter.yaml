@@ -2,5 +2,5 @@ framework:
   rate_limiter:
     register_account:
       policy: 'token_bucket'
-      limit: 5
-      rate: { interval: '15 minutes', amount: 1 }
+      limit: '%env(int:RATE_LIMITER_LIMIT)%'
+      rate: { interval: '%env(RATE_LIMITER_INTERVAL)%', amount: 1 }
