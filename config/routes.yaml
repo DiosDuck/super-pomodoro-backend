@@ -1,7 +1,7 @@
-controllers_health:
+controllers_status:
     resource:
-        path: ../src/Health/Controller/
-        namespace: App\Health\Controller
+        path: ../src/Status/Controller/
+        namespace: App\Status\Controller
     type: attribute
 
 controllers_auth:

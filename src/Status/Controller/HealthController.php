@@ -2,12 +2,12 @@
 
 declare(strict_types = 1);
 
-namespace App\Health\Controller;
+namespace App\Status\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Attribute\Route;
-use App\Health\Model\Ping;
-use App\Health\Model\Status;
+use App\Status\Model\Ping;
+use App\Status\Model\StatusCode;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -48,12 +48,12 @@ class HealthController extends AbstractController
         $fail = $request->query->get('fail');
         if ($fail !== null) {
             return $this->json(
-                new Ping('Test error message', Status::CRIT),
+                new Ping(StatusCode::CRIT),
                 JsonResponse::HTTP_SERVICE_UNAVAILABLE
             );
         }
 
-        return $this->json(new Ping('OK'));
+        return $this->json(new Ping());
     }
 
     #[Route(path: '/database', name: 'database', methods: ['GET'])]
@@ -81,10 +81,10 @@ class HealthController extends AbstractController
         try {
             $connection->executeQuery('SELECT 1');
 
-            return $this->json(new Ping('OK'));
+            return $this->json(new Ping());
         } catch (\Throwable $e) {
             return $this->json(
-                new Ping('Service Unavailable', Status::CRIT),
+                new Ping(StatusCode::CRIT, 'Service Unavailable'),
                 JsonResponse::HTTP_SERVICE_UNAVAILABLE
             );
         }
