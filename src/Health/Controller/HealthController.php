@@ -37,8 +37,8 @@ class HealthController extends AbstractController
         )
     )]
     #[OA\Response(
-        response: 500,
-        description: 'Internal server error',
+        response: 503,
+        description: 'Service Unavailable',
         content: new OA\JsonContent(
             ref: new Model(type: Ping::class),
         )
@@ -49,7 +49,7 @@ class HealthController extends AbstractController
         if ($fail !== null) {
             return $this->json(
                 new Ping('Test error message', Status::CRIT),
-                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+                JsonResponse::HTTP_SERVICE_UNAVAILABLE
             );
         }
 
@@ -70,8 +70,8 @@ class HealthController extends AbstractController
         )
     )]
     #[OA\Response(
-        response: 500,
-        description: 'Internal server error',
+        response: 503,
+        description: 'Service Unavailable',
         content: new OA\JsonContent(
             ref: new Model(type: Ping::class),
         )
@@ -84,8 +84,8 @@ class HealthController extends AbstractController
             return $this->json(new Ping('OK'));
         } catch (\Throwable $e) {
             return $this->json(
-                new Ping($e->getMessage(), Status::CRIT),
-                JsonResponse::HTTP_INTERNAL_SERVER_ERROR
+                new Ping('Service Unavailable', Status::CRIT),
+                JsonResponse::HTTP_SERVICE_UNAVAILABLE
             );
         }
     }
