@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Authentication\Entity;
 
-use App\Authentication\Enum\TokenTypeEnum;
+use App\Authentication\Utils\Enum\TokenTypeEnum;
 use App\Authentication\Repository\TokenVerificationRepository;
 use Doctrine\ORM\Mapping as ORM;
 

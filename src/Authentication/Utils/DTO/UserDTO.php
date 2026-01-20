@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Authentication\DTO;
+namespace App\Authentication\Utils\DTO;
 
 use App\Authentication\Entity\User;
 use OpenApi\Attributes as OA;

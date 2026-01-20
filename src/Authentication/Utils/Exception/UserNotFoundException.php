@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Authentication\Exception;
+declare(strict_types=1);
+
+namespace App\Authentication\Utils\Exception;
 
 use Exception;
 

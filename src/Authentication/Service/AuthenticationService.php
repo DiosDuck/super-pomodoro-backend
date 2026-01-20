@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Authentication\Service;
 
-use App\Authentication\DTO\CreatedTokenDTO;
-use App\Authentication\DTO\RegisterUserDTO;
+use App\Authentication\Utils\DTO\CreatedTokenDTO;
+use App\Authentication\Utils\DTO\RegisterUserDTO;
 use App\Authentication\Entity\TokenVerification;
 use App\Authentication\Entity\User;
-use App\Authentication\Enum\TokenTypeEnum;
-use App\Authentication\Exception\InvalidPasswordException;
-use App\Authentication\Exception\InvalidRegisterDataException;
-use App\Authentication\Exception\InvalidTokenException;
-use App\Authentication\Exception\UserNotFoundException;
+use App\Authentication\Utils\Enum\TokenTypeEnum;
+use App\Authentication\Utils\Exception\InvalidPasswordException;
+use App\Authentication\Utils\Exception\InvalidRegisterDataException;
+use App\Authentication\Utils\Exception\InvalidTokenException;
+use App\Authentication\Utils\Exception\UserNotFoundException;
 use App\Authentication\Repository\TokenVerificationRepository;
 use App\Authentication\Repository\UserRepository;
 use DateTimeImmutable;

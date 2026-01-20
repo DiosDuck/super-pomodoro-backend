@@ -4,24 +4,23 @@ declare(strict_types=1);
 
 namespace App\Authentication\Controller;
 
-use App\Authentication\DTO\RegisterUserDTO;
-use App\Authentication\DTO\VerificationTokenRequestDTO;
-use App\Authentication\Enum\TokenTypeEnum;
+use App\Authentication\Utils\DTO\RegisterUserDTO;
+use App\Authentication\Utils\DTO\VerificationTokenRequestDTO;
+use App\Authentication\Utils\Enum\TokenTypeEnum;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Authentication\Exception\InvalidRegisterDataException;
-use App\Authentication\Exception\InvalidTokenException;
+use App\Authentication\Utils\Exception\InvalidRegisterDataException;
+use App\Authentication\Utils\Exception\InvalidTokenException;
 use App\Authentication\Service\AuthenticationService;
+use App\Authentication\Service\MailSenderService;
+use App\Authentication\Service\VerifyEmailUrlService;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\BodyRendererInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 #[Route(path: '/api/auth/register', name: 'api_auth_register_')]
@@ -29,7 +28,6 @@ class AuthenticationController extends AbstractController {
     public function __construct(
         private readonly AuthenticationService $authenticationService,
         private EntityManagerInterface $entityManager,
-        private string $frontendBaseUrl,
     ) { }
 
     #[Route(path: '', name: 'index', methods: ['PUT'])]
@@ -58,8 +56,8 @@ class AuthenticationController extends AbstractController {
     public function register(
         #[MapRequestPayload] RegisterUserDTO $registerUser,
         RateLimiterFactoryInterface $registerAccountLimiter,
-        MailerInterface $mailer,
-        BodyRendererInterface $bodyRenderer,
+        MailSenderService $mailSenderService,
+        VerifyEmailUrlService $verifyEmailUrlService,
         Request $request,
     ): JsonResponse {
         try {
@@ -87,30 +85,18 @@ class AuthenticationController extends AbstractController {
         $this->entityManager->persist($createdToken->tokenVerification);
         $this->entityManager->flush();
 
-        $queryParam = http_build_query(
-            [
-                'token' => $createdToken->unhashedToken, 
-                'id' => $user->getId(),
-            ]
-        );
-
-        $email = new TemplatedEmail();
-        $email->to($user->getEmail())
-            ->subject('Registering Account')
-            ->htmlTemplate('@authentication/email/register.html.twig')
-            ->context([
+        $templatedMailBuilder = $mailSenderService->getTemplatedMailBuilder();
+        $email = $templatedMailBuilder
+            ->createNewTemplatedEmail()
+            ->setSubject('Registering Account')
+            ->setHtmlTemplate('@authentication/email/register.html.twig')
+            ->setContext([
                 'displayName' => $user->getDisplayName(),
-                'url' => sprintf(
-                    '%s/verify-email/register?%s',
-                    $this->frontendBaseUrl,
-                    $queryParam,
-                ),
+                'url' => $verifyEmailUrlService->getRegisterEmailUrl($createdToken->unhashedToken, $user->getId()),
                 'username' => $user->getUsername(),
             ])
-        ;
-
-        $bodyRenderer->render($email);
-        $mailer->send($email);
+            ->getMail();
+        $mailSenderService->sendTemplatedMail($email);
 
         return $this->json(['message' => 'ok']);
     }

@@ -6,7 +6,7 @@ namespace App\Authentication\Repository;
 
 use App\Authentication\Entity\TokenVerification;
 use App\Authentication\Entity\User;
-use App\Authentication\Enum\TokenTypeEnum;
+use App\Authentication\Utils\Enum\TokenTypeEnum;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;

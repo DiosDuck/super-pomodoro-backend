@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Authentication\DTO;
+declare(strict_types=1);
+
+namespace App\Authentication\Utils\DTO;
 
 use OpenApi\Attributes as OA;
 use Symfony\Component\Serializer\Attribute\Ignore;

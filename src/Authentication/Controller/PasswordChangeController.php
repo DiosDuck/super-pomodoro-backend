@@ -4,25 +4,24 @@ declare(strict_types=1);
 
 namespace App\Authentication\Controller;
 
-use App\Authentication\DTO\ChangePasswordRequestDTO;
-use App\Authentication\DTO\ResetPasswordTokenRequestDTO;
+use App\Authentication\Utils\DTO\ChangePasswordRequestDTO;
+use App\Authentication\Utils\DTO\ResetPasswordTokenRequestDTO;
 use App\Authentication\Entity\User;
-use App\Authentication\Enum\TokenTypeEnum;
-use App\Authentication\Exception\InvalidPasswordException;
-use App\Authentication\Exception\InvalidTokenException;
-use App\Authentication\Exception\UserNotFoundException;
+use App\Authentication\Utils\Enum\TokenTypeEnum;
+use App\Authentication\Utils\Exception\InvalidPasswordException;
+use App\Authentication\Utils\Exception\InvalidTokenException;
+use App\Authentication\Utils\Exception\UserNotFoundException;
 use App\Authentication\Service\AuthenticationService;
+use App\Authentication\Service\MailSenderService;
+use App\Authentication\Service\VerifyEmailUrlService;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\BodyRendererInterface;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
@@ -69,10 +68,9 @@ class PasswordChangeController extends AbstractController
     )]
     public function forgotPassword(
         Request $request,
-        string $frontendBaseUrl,
+        VerifyEmailUrlService $verifyEmailUrlService,
         RateLimiterFactoryInterface $registerAccountLimiter,
-        MailerInterface $mailer,
-        BodyRendererInterface $bodyRenderer,
+        MailSenderService $mailSenderService,
     ): JsonResponse 
     {
         try {
@@ -99,30 +97,19 @@ class PasswordChangeController extends AbstractController
 
         $this->entityManager->persist($createdToken->tokenVerification);
         $this->entityManager->flush();
-        $queryParam = http_build_query(
-            [
-                'token' => $createdToken->unhashedToken, 
-                'id' => $user->getId(),
-            ]
-        );
 
-        $email = new TemplatedEmail();
-        $email->to($user->getEmail())
-            ->subject('Password Reset')
-            ->htmlTemplate('@authentication/email/password-reset.html.twig')
-            ->context([
+        $templatedMailBuilder = $mailSenderService->getTemplatedMailBuilder();
+        $email = $templatedMailBuilder
+            ->createNewTemplatedEmail()
+            ->setSubject('Password Reset')
+            ->setHtmlTemplate('@authentication/email/password-reset.html.twig')
+            ->setContext([
                 'displayName' => $user->getDisplayName(),
-                'url' => sprintf(
-                    '%s/verify-email/password-reset?%s',
-                    $frontendBaseUrl,
-                    $queryParam,
-                ),
+                'url' => $verifyEmailUrlService->getForgotPasswordUrl($createdToken->unhashedToken, $user->getId()),
                 'username' => $user->getUsername(),
             ])
-        ;
-
-        $bodyRenderer->render($email);
-        $mailer->send($email);
+            ->getMail();
+        $mailSenderService->sendTemplatedMail($email);
 
         return $this->json(['message' => $createdToken->unhashedToken]);
     }

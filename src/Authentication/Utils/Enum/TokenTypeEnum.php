@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Authentication\Enum;
+namespace App\Authentication\Utils\Enum;
 
 enum TokenTypeEnum: string
 {
