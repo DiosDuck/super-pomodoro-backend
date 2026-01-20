@@ -72,8 +72,12 @@ class ProfileController extends AbstractController {
         description: 'User is deleted',
     )]
     #[OA\Response(
+        response: 401,
+        description: 'User not logged in',
+    )]
+    #[OA\Response(
         response: 403,
-        description: 'User not logged in or wrong password',
+        description: 'Invalid password',
     )]
     public function deleteAccount(
         #[CurrentUser] ?User $user,
@@ -84,8 +88,8 @@ class ProfileController extends AbstractController {
     {
         if (null === $user) {
             return $this->json(
-                ['message' => 'Forbidden'],
-                JsonResponse::HTTP_FORBIDDEN,
+                ['message' => 'Unauthorized'],
+                JsonResponse::HTTP_UNAUTHORIZED,
             );
         }
 

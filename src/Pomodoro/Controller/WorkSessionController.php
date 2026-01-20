@@ -47,7 +47,11 @@ class WorkSessionController extends AbstractController {
         description: 'Session is saved',
     )]
     #[OA\Response(
-        response: 403,
+        response: 400,
+        description: 'Bad request',
+    )]
+    #[OA\Response(
+        response: 401,
         description: 'User is not logged in',
     )]
     public function saveWorkSession(
@@ -59,8 +63,8 @@ class WorkSessionController extends AbstractController {
     {
         if (null === $user) {
             return $this->json(
-                ['message' => 'Forbidden'],
-                JsonResponse::HTTP_FORBIDDEN
+                ['message' => 'Unauthorized'],
+                JsonResponse::HTTP_UNAUTHORIZED
             );
         }
 
@@ -69,8 +73,8 @@ class WorkSessionController extends AbstractController {
 
         if (!$workSessionService->isNewWorkSessionValid($user, $workTime)) {
             return $this->json(
-                ['message' => 'Forbidden'],
-                JsonResponse::HTTP_FORBIDDEN
+                ['message' => 'Bad Request'],
+                JsonResponse::HTTP_BAD_REQUEST
             );
         }
 
@@ -113,7 +117,7 @@ class WorkSessionController extends AbstractController {
         )
     )]
     #[OA\Response(
-        response: 403,
+        response: 401,
         description: 'User is not logged in',
     )]
     public function getWorkSessionHistory(
@@ -124,8 +128,8 @@ class WorkSessionController extends AbstractController {
     {
         if (null === $user) {
             return $this->json(
-                ['message' => 'Forbidden'],
-                JsonResponse::HTTP_FORBIDDEN
+                ['message' => 'Unauthorized'],
+                JsonResponse::HTTP_UNAUTHORIZED
             );
         }
 

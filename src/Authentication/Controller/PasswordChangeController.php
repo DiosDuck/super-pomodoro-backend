@@ -193,8 +193,12 @@ class PasswordChangeController extends AbstractController
         description: 'Password has been changed',
     )]
     #[OA\Response(
+        response: 401,
+        description: 'User not logged in',
+    )]
+    #[OA\Response(
         response: 403,
-        description: 'User not logged in or invalid password',
+        description: 'Invalid password',
     )]
     public function changePassword(
         #[CurrentUser] ?User $user,
@@ -202,7 +206,7 @@ class PasswordChangeController extends AbstractController
     ): JsonResponse
     {
         if (null === $user) {
-            return $this->json(['message' => 'Forbidden'], JsonResponse::HTTP_FORBIDDEN);
+            return $this->json(['message' => 'Unauthorized'], JsonResponse::HTTP_UNAUTHORIZED);
         }
 
         try {
