@@ -89,6 +89,7 @@ class AuthenticationController extends AbstractController {
         $email = $templatedMailBuilder
             ->createNewTemplatedEmail()
             ->setSubject('Registering Account')
+            ->setReceiver($user->getEmail())
             ->setHtmlTemplate('@authentication/email/register.html.twig')
             ->setContext([
                 'displayName' => $user->getDisplayName(),

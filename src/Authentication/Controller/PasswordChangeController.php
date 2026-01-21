@@ -95,13 +95,11 @@ class PasswordChangeController extends AbstractController
             $user,
         );
 
-        $this->entityManager->persist($createdToken->tokenVerification);
-        $this->entityManager->flush();
-
         $templatedMailBuilder = $mailSenderService->getTemplatedMailBuilder();
         $email = $templatedMailBuilder
             ->createNewTemplatedEmail()
             ->setSubject('Password Reset')
+            ->setReceiver($user->getEmail())
             ->setHtmlTemplate('@authentication/email/password-reset.html.twig')
             ->setContext([
                 'displayName' => $user->getDisplayName(),
@@ -110,6 +108,9 @@ class PasswordChangeController extends AbstractController
             ])
             ->getMail();
         $mailSenderService->sendTemplatedMail($email);
+
+        $this->entityManager->persist($createdToken->tokenVerification);
+        $this->entityManager->flush();
 
         return $this->json(['message' => $createdToken->unhashedToken]);
     }

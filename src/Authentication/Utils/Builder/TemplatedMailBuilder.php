@@ -22,6 +22,13 @@ class TemplatedMailBuilder
         return $this;
     }
 
+    public function setReceiver(string $receiver): self
+    {
+        $this->email?->to($receiver);
+
+        return $this;
+    }
+
     public function setSubject(string $subject): self
     {
         $this->email?->subject($subject);
