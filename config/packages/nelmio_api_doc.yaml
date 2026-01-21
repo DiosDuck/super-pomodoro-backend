@@ -32,6 +32,8 @@ nelmio_api_doc:
                                         properties:
                                             token:
                                                 type: string
+                                            refresh_token:
+                                                type: string
                         '401':
                             description: Invalid credentials
             /api/auth/logout:
@@ -43,6 +45,31 @@ nelmio_api_doc:
                     responses:
                         '200':
                             description: User is logged out
+            /api/auth/token/refresh:
+                post:
+                    tags: [Authentication]
+                    summary: Refresh the token
+                    requestBody:
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    properties:
+                                        refresh_token:
+                                            type: string
+                                        refresh_token:
+                                            type: string
+                responses:
+                    '200':
+                        description: New token generated
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    properties:
+                                        token:
+                                            type: string
         components:
             securitySchemes:
                 Bearer:

@@ -17,24 +17,22 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
-        # Login
-        authentication_api:
-            pattern: ^/api/auth/login
+        # Endpoints
+        api:
+            pattern: ^/api
             stateless: true
+            provider: app_user_provider
             user_checker: App\Authentication\Security\ActiveUserChecker
+            entry_point: jwt
             json_login:
                 check_path: api_auth_login
                 username_path: username
                 password_path: password
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
-
-        # Endpoints
-        api:
-            pattern: ^/api
-            stateless: true
-            provider: app_user_provider
             jwt: ~
+            refresh_jwt:
+                check_path: gesdinet_jwt_refresh_token
             logout:
                 path: api_auth_logout
 
