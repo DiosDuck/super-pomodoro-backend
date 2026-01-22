@@ -58,18 +58,18 @@ nelmio_api_doc:
                                     properties:
                                         refresh_token:
                                             type: string
-                                        refresh_token:
-                                            type: string
-                responses:
-                    '200':
-                        description: New token generated
-                        content:
-                            application/json:
-                                schema:
-                                    type: object
-                                    properties:
-                                        token:
-                                            type: string
+                    responses:
+                        '200':
+                            description: New token generated
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            token:
+                                                type: string
+                                            refresh_token:
+                                                type: string
         components:
             securitySchemes:
                 Bearer:
