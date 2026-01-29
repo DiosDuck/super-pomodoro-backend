@@ -4,9 +4,22 @@ declare(strict_types=1);
 
 namespace App\Authentication\Repository;
 
-use Gesdinet\JWTRefreshTokenBundle\Entity\RefreshTokenRepository as BaseRefreshTokenRepository;
+use App\Authentication\Entity\RefreshToken;
+use DateTime;
+use DateTimeInterface;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 
-class RefreshTokenRepository extends BaseRefreshTokenRepository {
+/**
+ * @extends ServiceEntityRepository<RefreshToken>
+ */
+class RefreshTokenRepository extends ServiceEntityRepository implements RefreshTokenRepositoryInterface {
+    public function __construct(ManagerRegistry $registry)
+    {
+        parent::__construct($registry, RefreshToken::class);
+    }
+    
     public function deleteRefreshToken(string $refreshToken): void
     {
         $this->createQueryBuilder('r')
@@ -16,5 +29,21 @@ class RefreshTokenRepository extends BaseRefreshTokenRepository {
             ->getQuery()
             ->execute()
         ;
+    }
+
+    /**
+     * @param DateTimeInterface|null $datetime
+     *
+     * @return RefreshToken[]
+     */
+    public function findInvalid($datetime = null): array
+    {
+        $datetime = $datetime ?? new DateTime();
+
+        return $this->createQueryBuilder('r')
+            ->where('r.valid < :datetime')
+            ->setParameter('datetime', $datetime)
+            ->getQuery()
+            ->getResult();
     }
 }

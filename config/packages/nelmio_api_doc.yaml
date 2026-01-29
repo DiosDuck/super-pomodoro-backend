@@ -42,6 +42,15 @@ nelmio_api_doc:
                     summary: Logout use
                     security:
                         - Bearer: []
+                    requestBody:
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    properties:
+                                        refresh_token:
+                                            type: string
                     responses:
                         '200':
                             description: User is logged out
