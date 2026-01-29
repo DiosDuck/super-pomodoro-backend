@@ -10,11 +10,11 @@ use App\Authentication\Entity\TokenVerification;
 use App\Authentication\Entity\User;
 use App\Authentication\Utils\Enum\TokenTypeEnum;
 use App\Authentication\Utils\Exception\InvalidPasswordException;
-use App\Authentication\Utils\Exception\InvalidRegisterDataException;
 use App\Authentication\Utils\Exception\InvalidTokenException;
 use App\Authentication\Utils\Exception\UserNotFoundException;
 use App\Authentication\Repository\TokenVerificationRepository;
 use App\Authentication\Repository\UserRepository;
+use App\Authentication\Utils\Exception\UserFoundException;
 use DateTimeImmutable;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -30,15 +30,14 @@ class AuthenticationService {
     ) { }
 
     /**
-     * @throws InvalidRegisterDataException
+     * @throws UserFoundException
      */
     public function getUserFromRegisterData(RegisterUserDTO $registerUser): User
     {
         if (
-            !$registerUser->isValid() ||
             $this->userRepository->findOneBy(['username' => $registerUser->username])
         ) {
-            throw new InvalidRegisterDataException();
+            throw new UserFoundException();
         }
 
         $user = new User();

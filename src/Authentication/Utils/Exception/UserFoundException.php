@@ -6,4 +6,4 @@ namespace App\Authentication\Utils\Exception;
 
 use Exception;
 
-class InvalidRegisterDataException extends Exception {}
+class UserFoundException extends Exception {}

@@ -9,11 +9,11 @@ use App\Authentication\Utils\DTO\VerificationTokenRequestDTO;
 use App\Authentication\Utils\Enum\TokenTypeEnum;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Authentication\Utils\Exception\InvalidRegisterDataException;
 use App\Authentication\Utils\Exception\InvalidTokenException;
 use App\Authentication\Service\AuthenticationService;
 use App\Authentication\Service\MailSenderService;
 use App\Authentication\Service\VerifyEmailUrlService;
+use App\Authentication\Utils\Exception\UserFoundException;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Model;
@@ -54,7 +54,9 @@ class AuthenticationController extends AbstractController {
         description: 'Too many requests for respective IP',
     )]
     public function register(
-        #[MapRequestPayload] RegisterUserDTO $registerUser,
+        #[MapRequestPayload(
+            validationFailedStatusCode: JsonResponse::HTTP_BAD_REQUEST,
+        )] RegisterUserDTO $registerUser,
         RateLimiterFactoryInterface $registerAccountLimiter,
         MailSenderService $mailSenderService,
         VerifyEmailUrlService $verifyEmailUrlService,
@@ -62,7 +64,7 @@ class AuthenticationController extends AbstractController {
     ): JsonResponse {
         try {
             $user = $this->authenticationService->getUserFromRegisterData($registerUser);
-        } catch (InvalidRegisterDataException) {
+        } catch (UserFoundException) {
             return $this->json(
                 ['message' => 'Invalid user data'],
                 JsonResponse::HTTP_BAD_REQUEST
