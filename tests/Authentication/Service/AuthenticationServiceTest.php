@@ -238,6 +238,6 @@ class AuthenticationServiceTest extends TestCase
             ->willReturn('hashed_password');
         
         $newUser = $this->authenticationService->changePassword($user, 'password', 'newPassword');
-        $this->assertEquals('hashed_password', $user->getPassword());
+        $this->assertEquals('hashed_password', $newUser->getPassword());
     }
 }
