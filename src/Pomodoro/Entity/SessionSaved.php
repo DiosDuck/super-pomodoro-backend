@@ -15,7 +15,7 @@ class SessionSaved
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private ?int $id;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
@@ -25,7 +25,7 @@ class SessionSaved
     private ?int $workTime = null;
 
     #[ORM\Column(name: 'created_at')]
-    private ?\DateTimeImmutable $createdAt;
+    private ?\DateTimeImmutable $createdAt = null;
 
     public function getId(): ?int
     {

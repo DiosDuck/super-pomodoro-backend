@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Authentication\Utils\DTO;
 
 use OpenApi\Attributes as OA;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[OA\Schema(
     title: 'Reset Password Token Request',
@@ -12,6 +13,7 @@ use OpenApi\Attributes as OA;
 )]
 class ResetPasswordTokenRequestDTO extends VerificationTokenRequestDTO
 {
+    #[Assert\NotBlank]
     #[OA\Property(example: 'new-password')]
     public string $newPassword;
 }

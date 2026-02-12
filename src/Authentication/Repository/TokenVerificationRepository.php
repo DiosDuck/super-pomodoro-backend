@@ -12,7 +12,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Token>
+ * @extends ServiceEntityRepository<TokenVerification>
  */
 class TokenVerificationRepository extends ServiceEntityRepository
 {

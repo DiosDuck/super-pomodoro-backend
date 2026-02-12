@@ -55,10 +55,6 @@ class PasswordChangeController extends AbstractController
         description: 'Reset password request was sent by email',
     )]
     #[OA\Response(
-        response: 400,
-        description: 'Invalid input data',
-    )]
-    #[OA\Response(
         response: 404,
         description: 'User not found',
     )]
@@ -135,7 +131,7 @@ class PasswordChangeController extends AbstractController
         description: 'Invalid token',
     )]
     public function resetPassword(
-        #[MapRequestPayload] ResetPasswordTokenRequestDTO $resetPasswordTokenRequest,
+        #[MapRequestPayload(validationFailedStatusCode: 400)] ResetPasswordTokenRequestDTO $resetPasswordTokenRequest,
     ): JsonResponse
     {
         try {

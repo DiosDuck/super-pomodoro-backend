@@ -19,7 +19,7 @@ class PomodoroCleanerCommand extends Command
         private readonly SessionSavedRepository $sessionSavedRepository,
     )
     {
-        return parent::__construct();
+        parent::__construct();
     }
 
     public function __invoke(OutputInterface $output): int

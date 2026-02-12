@@ -1,2 +1,2 @@
 maker:
-  root_namespace: 'App\Authentication\'
+  root_namespace: 'App\Authentication'

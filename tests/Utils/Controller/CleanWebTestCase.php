@@ -25,6 +25,7 @@ class CleanWebTestCase extends WebTestCase
         $this->client->enableReboot();
 
         $this->client->getContainer()->get('cache.app')->clear();
+        $this->client->getContainer()->get('cache.rate_limiter')->clear();
 
         /** @var EntityManagerInterface $em */
         $em = $this->client->getContainer()->get('doctrine')->getManager();
@@ -66,6 +67,17 @@ class CleanWebTestCase extends WebTestCase
         $em->flush();
 
         return $user;
+    }
+
+    protected function saveObjectToDatabase(object $obj): object
+    {
+        /** @var EntityManagerInterface $em */
+        $em = $this->client->getContainer()->get('doctrine')->getManager();
+
+        $em->persist($obj);
+        $em->flush();
+
+        return $obj;
     }
 
     protected function testAndGetLoginToken(string $user, string $password): string

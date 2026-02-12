@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+namespace App\Tests\Authentication\Controller;
+
 use App\Authentication\Entity\User;
 use App\Tests\Utils\Controller\CleanWebTestCase;
+use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\Response;
 
 class ProfileControllerTest extends CleanWebTestCase
@@ -65,7 +68,10 @@ class ProfileControllerTest extends CleanWebTestCase
         $this->client->request(
             'DELETE',
             '/api/profile',
-            server: ['HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token)],
+            server: [
+                'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
+                'CONTENT_TYPE' => 'application/json',
+            ],
             content: json_encode(['password' => 'wrong_password'], JSON_THROW_ON_ERROR)
         );
 
@@ -90,7 +96,10 @@ class ProfileControllerTest extends CleanWebTestCase
         $this->client->request(
             'DELETE',
             '/api/profile',
-            server: ['HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token)],
+            server: [
+                'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
+                'CONTENT_TYPE' => 'application/json',
+            ],
             content: json_encode(['password' => 'password'], JSON_THROW_ON_ERROR)
         );
 

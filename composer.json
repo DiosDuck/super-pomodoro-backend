@@ -74,6 +74,9 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
+        ],
+        "phpstan": [
+            "vendor/bin/phpstan analyze --memory-limit 256M"
         ]
     },
     "conflict": {
@@ -87,6 +90,8 @@
         }
     },
     "require-dev": {
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-doctrine": "^2.0",
         "phpunit/phpunit": "^11.5.50",
         "symfony/browser-kit": "7.4.*",
         "symfony/css-selector": "7.4.*",

@@ -34,6 +34,9 @@ class VerifyEmailUrlService {
         );
     }
 
+    /**
+     * @param array<string, mixed> $queryParams
+     */
     private function getUrl(
         string $url,
         array $queryParams,

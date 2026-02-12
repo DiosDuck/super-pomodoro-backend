@@ -13,6 +13,7 @@ use Gesdinet\JWTRefreshTokenBundle\Doctrine\RefreshTokenRepositoryInterface;
 
 /**
  * @extends ServiceEntityRepository<RefreshToken>
+ * @implements RefreshTokenRepositoryInterface<RefreshToken>
  */
 class RefreshTokenRepository extends ServiceEntityRepository implements RefreshTokenRepositoryInterface {
     public function __construct(ManagerRegistry $registry)

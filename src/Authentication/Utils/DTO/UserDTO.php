@@ -12,6 +12,7 @@ use OpenApi\Attributes as OA;
     description: 'User Schema for basic info',
 )]
 class UserDTO {
+    /** @param array<string> $roles */
     public function __construct(
         #[OA\Property(type: 'string', example: 'John Smith')]
         public string $displayName,

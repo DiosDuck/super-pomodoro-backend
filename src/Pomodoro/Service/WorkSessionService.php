@@ -7,6 +7,7 @@ namespace App\Pomodoro\Service;
 use App\Authentication\Entity\User;
 use App\Pomodoro\Repository\SessionSavedRepository;
 use App\Pomodoro\Repository\SettingsRepository;
+use App\Pomodoro\DTO\SessionHistoryDailyDTO;
 use DateInterval;
 use DateTimeImmutable;
 
@@ -34,6 +35,9 @@ class WorkSessionService {
         return $diff >= $workTime;
     }
 
+    /**
+     * @return array<SessionHistoryDailyDTO>
+     */
     public function getHistoryForAWeek(User $user, int $lastDayTimestamp): array
     {
         $lastDay = new DateTimeImmutable(

@@ -24,28 +24,31 @@ class TemplatedMailBuilder
 
     public function setReceiver(string $receiver): self
     {
-        $this->email?->to($receiver);
+        $this->email->to($receiver);
 
         return $this;
     }
 
     public function setSubject(string $subject): self
     {
-        $this->email?->subject($subject);
+        $this->email->subject($subject);
 
         return $this;
     }
 
     public function setHtmlTemplate(string $template): self
     {
-        $this->email?->htmlTemplate($template);
+        $this->email->htmlTemplate($template);
 
         return $this;
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     public function setContext(array $context): self
     {
-        $this->email?->context($context);
+        $this->email->context($context);
 
         return $this;
     }

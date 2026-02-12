@@ -12,13 +12,13 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends SessionSavedRepository<SessionSaved>
+ * @extends ServiceEntityRepository<SessionSaved>
  */
 class SessionSavedRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        return parent::__construct($registry, SessionSaved::class);
+        parent::__construct($registry, SessionSaved::class);
     }
 
     public function findLastWorkSession(User $user): ?SessionSaved
@@ -47,7 +47,7 @@ class SessionSavedRepository extends ServiceEntityRepository
     public function getSessionHistoryForADay(User $user, DateTimeImmutable $startDateTime): SessionHistoryDailyDTO
     {
         $row = $this->createQueryBuilder('s')
-            ->select('SUM(s.workTime) as workTimeTotal, COUNT(s) as sessionAmount')
+            ->select('COALESCE(SUM(s.workTime), 0) as workTimeTotal, COUNT(s) as sessionAmount')
             ->andWhere('s.createdAt >= :startCreatedAt')
             ->setParameter('startCreatedAt', $startDateTime)
             ->andWhere('s.createdAt < :endCreatedAt')
@@ -59,8 +59,8 @@ class SessionSavedRepository extends ServiceEntityRepository
         ;
 
         return new SessionHistoryDailyDTO(
-            workTimeTotal: (int) $row[0]['workTimeTotal'] ?? 0,
-            sessionAmount: (int) $row[0]['sessionAmount'] ?? 0,
+            workTimeTotal: (int) $row[0]['workTimeTotal'],
+            sessionAmount: (int) $row[0]['sessionAmount'],
             timestamp: $startDateTime->getTimestamp() * 1000,
         );
     }
