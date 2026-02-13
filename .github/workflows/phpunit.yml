@@ -13,7 +13,7 @@ jobs:
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-versions: '8.2'
+          php-version: '8.2'
           tools: composer:v2, phpunit:v11.5
           coverage: none
       
