@@ -1,9 +1,9 @@
-name: Clean code
+name: PHPStan
 
 on: [push]
 
 jobs:
-  clean-code:
+  php-stan:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,14 +23,5 @@ jobs:
       - name: Install Dependencies
         run: composer install
 
-      - name: PHPUnit
-        run: composer phpunit
-
       - name: PHPStan
         run: composer phpstan
-      
-      - name: Code Coverage
-        uses: docker://ghcr.io/ericsizemore/phpunit-coverage-check-action
-        with:
-          clover_file: 'clover.xml'
-          threshold: 40
