@@ -1,0 +1,27 @@
+name: PHPUnit
+
+on: [push]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-versions: '8.2'
+          tools: composer:v2, phpunit:v11.5
+          coverage: none
+      
+      - name: Check PHP Version
+        run: php -v
+
+      - name: Install dependencies
+        run: composer install --dev
+
+      - name: Run PHPUnit tests
+        run: ./vendor/bin/phpunit --testdox
