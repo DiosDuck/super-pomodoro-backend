@@ -32,7 +32,7 @@ class ActiveUserCheckerTest extends TestCase {
         $user = $this->createMock(User::class);
         $user->expects($this->once())
             ->method('isActive')
-            ->willReturn(true);
+            ->willReturn(false);
 
         $this->activeUserChecker->checkPreAuth($user);
     }

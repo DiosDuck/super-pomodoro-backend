@@ -1,4 +1,4 @@
-name: PHPUnit
+name: Clean code
 
 on: [push]
 
@@ -24,4 +24,7 @@ jobs:
         run: composer install
 
       - name: Run PHPUnit tests
-        run: ./vendor/bin/phpunit --testdox
+        run: composer phpunit
+
+      - name: Run PHPStan
+        run: composer phpstan

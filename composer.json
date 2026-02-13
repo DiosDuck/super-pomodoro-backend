@@ -77,6 +77,9 @@
         ],
         "phpstan": [
             "vendor/bin/phpstan analyze --memory-limit 256M"
+        ],
+        "phpunit": [
+            "vendor/bin/phpunit --testdox"
         ]
     },
     "conflict": {
