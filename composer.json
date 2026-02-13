@@ -79,7 +79,7 @@
             "vendor/bin/phpstan analyze --memory-limit 256M"
         ],
         "phpunit": [
-            "vendor/bin/phpunit --testdox"
+            "vendor/bin/phpunit --testdox --coverage-clover clover.xml"
         ]
     },
     "conflict": {

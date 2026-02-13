@@ -3,11 +3,11 @@ name: Clean code
 on: [push]
 
 jobs:
-  build-test:
+  clean-code:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Install PHP
@@ -15,16 +15,22 @@ jobs:
         with:
           php-version: '8.2'
           tools: composer:v2, phpunit:v11.5
-          coverage: none
+          coverage: xdebug, pcov
       
-      - name: Check PHP Version
+      - name: PHP Version Check
         run: php -v
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: composer install
 
-      - name: Run PHPUnit tests
+      - name: PHPUnit
         run: composer phpunit
 
-      - name: Run PHPStan
+      - name: Code Coverage
+        use: docker://ghcr.io/ericsizemore/phpunit-coverage-check-action
+        with:
+          clover_file: 'clover.xml'
+          threshold: 20
+
+      - name: PHPStan
         run: composer phpstan
