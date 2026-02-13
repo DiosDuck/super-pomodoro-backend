@@ -27,7 +27,7 @@ jobs:
         run: composer phpunit
 
       - name: Code Coverage
-        use: docker://ghcr.io/ericsizemore/phpunit-coverage-check-action
+        uses: docker://ghcr.io/ericsizemore/phpunit-coverage-check-action
         with:
           clover_file: 'clover.xml'
           threshold: 20
