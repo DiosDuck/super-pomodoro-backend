@@ -26,11 +26,11 @@ jobs:
       - name: PHPUnit
         run: composer phpunit
 
+      - name: PHPStan
+        run: composer phpstan
+      
       - name: Code Coverage
         uses: docker://ghcr.io/ericsizemore/phpunit-coverage-check-action
         with:
           clover_file: 'clover.xml'
-          threshold: 20
-
-      - name: PHPStan
-        run: composer phpstan
+          threshold: 40
