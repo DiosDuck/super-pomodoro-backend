@@ -21,7 +21,7 @@ jobs:
         run: php -v
 
       - name: Install dependencies
-        run: composer install --dev
+        run: composer install
 
       - name: Run PHPUnit tests
         run: ./vendor/bin/phpunit --testdox
