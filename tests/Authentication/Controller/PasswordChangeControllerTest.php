@@ -10,16 +10,18 @@ use App\Authentication\Utils\Enum\TokenTypeEnum;
 use App\Tests\Utils\Controller\CleanWebTestCase;
 use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PasswordHasher\PasswordHasherInterface;
 
 class PasswordChangeControllerTest extends CleanWebTestCase
 {
-    public function testGetForgotPasswordBad(): void
+    public function testGetForgotPasswordNotFound(): void
     {
         $this->client->request('PUT', '/api/auth/password/forgot-password');
+        $this->assertResponseIsSuccessful();
+        $this->assertEmailCount(0);
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+        $this->client->request('PUT', '/api/auth/password/forgot-password');
+        $this->assertResponseStatusCodeSame(Response::HTTP_TOO_MANY_REQUESTS);
     }
 
     public function testGetForgotPasswordSuccessAndLimited(): void
@@ -136,5 +138,103 @@ class PasswordChangeControllerTest extends CleanWebTestCase
         );
 
         $this->assertResponseIsSuccessful();
+    }
+
+    public function testChangePasswordBadRequest(): void
+    {
+        $this->client->request(
+            'POST',
+            '/api/auth/password/change-password',
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            content: json_encode(
+                ['password' => 'abcdef', 'newPassword' => 'abcd'], 
+                JSON_THROW_ON_ERROR,
+            )
+        );
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+    }
+
+    public function testChangePasswordUserNotLoggedIn(): void
+    {
+        $this->client->request(
+            'POST',
+            '/api/auth/password/change-password',
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            content: json_encode(
+                ['password' => 'abcdef', 'newPassword' => 'abcdef'], 
+                JSON_THROW_ON_ERROR,
+            )
+        );
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+    }
+
+    public function testChangePasswordWrongPassword(): void
+    {
+        $user = new User();
+        $user->setEmail('test@example.com');
+        $user->setUsername('username');
+        $user->setRoles(['ROLE_USER']);
+        $user->setActivatedAt(new DateTimeImmutable());
+        $user->setDisplayName('Test Me');
+        $user->setIsActive(true);
+        $user->setPassword('password');
+
+        $this->saveUser($user);
+
+        $token = $this->testAndGetLoginToken('username', 'password');
+
+        $this->client->request(
+            'POST',
+            '/api/auth/password/change-password',
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
+            ],
+            content: json_encode(
+                ['password' => 'abcdef', 'newPassword' => 'abcdef'], 
+                JSON_THROW_ON_ERROR,
+            )
+        );
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
+    public function testChangePasswordSuccess(): void
+    {
+        $user = new User();
+        $user->setEmail('test@example.com');
+        $user->setUsername('username');
+        $user->setRoles(['ROLE_USER']);
+        $user->setActivatedAt(new DateTimeImmutable());
+        $user->setDisplayName('Test Me');
+        $user->setIsActive(true);
+        $user->setPassword('password');
+
+        $this->saveUser($user);
+
+        $token = $this->testAndGetLoginToken('username', 'password');
+
+        $this->client->request(
+            'POST',
+            '/api/auth/password/change-password',
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
+            ],
+            content: json_encode(
+                ['password' => 'password', 'newPassword' => 'newpassword'], 
+                JSON_THROW_ON_ERROR,
+            )
+        );
+
+        $this->assertResponseIsSuccessful();
+
+        $this->testAndGetLoginToken('username', 'newpassword');
     }
 }

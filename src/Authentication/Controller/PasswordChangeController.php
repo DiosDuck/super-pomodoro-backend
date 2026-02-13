@@ -55,10 +55,6 @@ class PasswordChangeController extends AbstractController
         description: 'Reset password request was sent by email',
     )]
     #[OA\Response(
-        response: 404,
-        description: 'User not found',
-    )]
-    #[OA\Response(
         response: 429,
         description: 'Too many requests for respective IP',
     )]
@@ -69,21 +65,18 @@ class PasswordChangeController extends AbstractController
         MailSenderService $mailSenderService,
     ): JsonResponse 
     {
-        try {
-            $user = $this->authenticationService->getUserByUsername(json_decode($request->getContent(), true)['username'] ?? '');
-        } catch (UserNotFoundException) {
-            return $this->json(
-                ['message' => 'Not Found'],
-                JsonResponse::HTTP_NOT_FOUND,
-            );
-        }
-
         $limiter = $registerAccountLimiter->create($request->getClientIp());
         if (false === $limiter->consume(1)->isAccepted()) {
             return $this->json(
                 ['message' => 'Too many requests'],
                 JsonResponse::HTTP_TOO_MANY_REQUESTS,
             );
+        }
+
+        try {
+            $user = $this->authenticationService->getUserByUsername(json_decode($request->getContent(), true)['username'] ?? '');
+        } catch (UserNotFoundException) {
+            return $this->json(['message' => bin2hex(random_bytes(32))]);
         }
 
         $createdToken = $this->authenticationService->createToken(
@@ -131,7 +124,7 @@ class PasswordChangeController extends AbstractController
         description: 'Invalid token',
     )]
     public function resetPassword(
-        #[MapRequestPayload(validationFailedStatusCode: 400)] ResetPasswordTokenRequestDTO $resetPasswordTokenRequest,
+        #[MapRequestPayload(validationFailedStatusCode: JsonResponse::HTTP_BAD_REQUEST)] ResetPasswordTokenRequestDTO $resetPasswordTokenRequest,
     ): JsonResponse
     {
         try {
@@ -177,6 +170,10 @@ class PasswordChangeController extends AbstractController
         description: 'Password has been changed',
     )]
     #[OA\Response(
+        response: 400,
+        description: 'Bad input',
+    )]
+    #[OA\Response(
         response: 401,
         description: 'User not logged in',
     )]
@@ -186,7 +183,7 @@ class PasswordChangeController extends AbstractController
     )]
     public function changePassword(
         #[CurrentUser] ?User $user,
-        #[MapRequestPayload] ChangePasswordRequestDTO $changePasswordRequest,
+        #[MapRequestPayload(validationFailedStatusCode: JsonResponse::HTTP_BAD_REQUEST)] ChangePasswordRequestDTO $changePasswordRequest,
     ): JsonResponse
     {
         if (null === $user) {
