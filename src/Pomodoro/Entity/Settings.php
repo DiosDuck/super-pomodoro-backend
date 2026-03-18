@@ -34,6 +34,9 @@ class Settings
     #[ORM\Column]
     private ?int $maxConfirmationTime = null;
 
+    #[ORM\Column]
+    private ?bool $enableWaiting = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -107,6 +110,18 @@ class Settings
     public function setMaxConfirmationTime(int $maxConfirmationTime): static
     {
         $this->maxConfirmationTime = $maxConfirmationTime;
+
+        return $this;
+    }
+
+    public function getEnableWaiting(): ?bool
+    {
+        return $this->enableWaiting;
+    }
+
+    public function setEnableWaiting(bool $enableWaiting): static
+    {
+        $this->enableWaiting = $enableWaiting;
 
         return $this;
     }

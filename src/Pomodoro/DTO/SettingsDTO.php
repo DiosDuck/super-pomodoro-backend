@@ -24,6 +24,8 @@ class SettingsDTO {
         public int $cyclesBeforeLongBreak,
         #[OA\Property(type: 'number', example: 1.0)]
         public float $maxConfirmationTime,
+        #[OA\Property(type: 'boolean', example: true)]
+        public bool $enableWaiting,
     ) {}
 
     public static function fromSettings(Settings $settings): self
@@ -34,6 +36,7 @@ class SettingsDTO {
             longBreakTime: $settings->getLongBreakTime() / 60,
             cyclesBeforeLongBreak: $settings->getCyclesBeforeLongBreak(),
             maxConfirmationTime: $settings->getMaxConfirmationTime() / 60,
+            enableWaiting: $settings->getEnableWaiting(),
         );
     }
 
@@ -48,6 +51,7 @@ class SettingsDTO {
         $settings->setLongBreakTime(intval($this->longBreakTime * 60));
         $settings->setCyclesBeforeLongBreak($this->cyclesBeforeLongBreak);
         $settings->setMaxConfirmationTime(intval($this->maxConfirmationTime * 60));
+        $settings->setEnableWaiting($this->enableWaiting);
 
         return $settings;
     }
