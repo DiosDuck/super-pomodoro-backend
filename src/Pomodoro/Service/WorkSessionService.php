@@ -14,16 +14,10 @@ use DateTimeImmutable;
 class WorkSessionService {
     public function __construct(
         private readonly SessionSavedRepository $sessionSavedRepository,
-        private readonly SettingsRepository $settingsRepository,
     ) { }
 
     public function isNewWorkSessionValid(User $user, int $workTime): bool
     {
-        $settings = $this->settingsRepository->findOneByUser($user);
-        if (null === $settings || $settings->getWorkTime() !== $workTime) {
-            return false;
-        }
-
         $sessionSaved = $this->sessionSavedRepository->findLastWorkSession($user);
         if (null === $sessionSaved) {
             return true;
