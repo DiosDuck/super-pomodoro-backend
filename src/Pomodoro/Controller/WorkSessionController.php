@@ -35,9 +35,9 @@ class WorkSessionController extends AbstractController {
             properties: [
                 new OA\Property(
                     property: 'workTime',
-                    description: 'in minutes',
+                    description: 'seconds',
                     type: 'number',
-                    example: 25,
+                    example: 1500,
                 ),
             ]
         )
@@ -68,8 +68,8 @@ class WorkSessionController extends AbstractController {
             );
         }
 
-        $workTimeFloat = json_decode($request->getContent(), true)['workTime'] ?? 0;
-        $workTime = intval($workTimeFloat * 60);
+        $workTimeVal = json_decode($request->getContent(), true)['workTime'] ?? 0;
+        $workTime = intval($workTimeVal);
 
         if (!$workSessionService->isNewWorkSessionValid($user, $workTime)) {
             return $this->json(
