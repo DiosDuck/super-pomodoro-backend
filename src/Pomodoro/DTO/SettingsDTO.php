@@ -63,7 +63,10 @@ class SettingsDTO {
             && $this->shortBreakTime > 0
             && $this->longBreakTime > 0
             && $this->cyclesBeforeLongBreak > 0
-            && $this->maxConfirmationTime > 0
+            && (
+                $this->maxConfirmationTime > 0 ||
+                $this->enableWaiting === false
+            )
         ;
     }
 }
