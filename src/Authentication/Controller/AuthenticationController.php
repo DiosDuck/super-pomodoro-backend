@@ -124,7 +124,7 @@ class AuthenticationController extends AbstractController {
         description: 'Invalid token data',
     )]
     public function verifyEmail(
-        #[MapRequestPayload] VerificationTokenRequestDTO $verificationTokenRequest,
+        #[MapRequestPayload(validationFailedStatusCode: JsonResponse::HTTP_BAD_REQUEST)] VerificationTokenRequestDTO $verificationTokenRequest,
     ): JsonResponse
     {
         try {

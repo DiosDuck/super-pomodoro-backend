@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Utils\Controller;
 
 use App\Authentication\Entity\User;
+use App\Authentication\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -67,6 +68,14 @@ class CleanWebTestCase extends WebTestCase
         $em->flush();
 
         return $user;
+    }
+
+    protected function getUser(string $username): User
+    {
+        /** @var UserRepository $repo */
+        $repo = $this->client->getContainer()->get(UserRepository::class);
+
+        return $repo->findOneBy(['username' => $username]);
     }
 
     protected function saveObjectToDatabase(object $obj): object
