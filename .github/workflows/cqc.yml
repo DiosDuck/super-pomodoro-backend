@@ -3,7 +3,7 @@ name: Code Quality Check
 on: [push]
 
 jobs:
-  php-unit:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,16 +16,44 @@ jobs:
           php-version: '8.2'
           tools: composer:v2, phpunit:v11.5
           coverage: xdebug, pcov
-      
+
       - name: PHP Version Check
         run: php -v
 
       - name: Install Dependencies
         run: composer install
 
+      - name: Cache vendor
+        uses: actions/cache/save@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-vendor-${{ hashFiles('composer.lock') }}
+
+  php-unit:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v6
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2, phpunit:v11.5
+          coverage: xdebug, pcov
+
+      - name: Restore vendor
+        uses: actions/cache/restore@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-vendor-${{ hashFiles('composer.lock') }}
+          fail-on-cache-miss: true
+
       - name: PHPUnit
         run: composer phpunit
-      
+
       - name: Code Coverage
         uses: docker://ghcr.io/ericsizemore/phpunit-coverage-check-action
         with:
@@ -33,6 +61,7 @@ jobs:
           threshold: 40
 
   php-stan:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -45,17 +74,19 @@ jobs:
           php-version: '8.2'
           tools: composer:v2, phpunit:v11.5
           coverage: xdebug, pcov
-      
-      - name: PHP Version Check
-        run: php -v
 
-      - name: Install Dependencies
-        run: composer install
+      - name: Restore vendor
+        uses: actions/cache/restore@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-vendor-${{ hashFiles('composer.lock') }}
+          fail-on-cache-miss: true
 
       - name: PHPStan
         run: composer phpstan
 
   composer-audit:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
@@ -68,12 +99,13 @@ jobs:
           php-version: '8.2'
           tools: composer:v2, phpunit:v11.5
           coverage: xdebug, pcov
-      
-      - name: PHP Version Check
-        run: php -v
 
-      - name: Install Dependencies
-        run: composer install
+      - name: Restore vendor
+        uses: actions/cache/restore@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-vendor-${{ hashFiles('composer.lock') }}
+          fail-on-cache-miss: true
 
       - name: Composer Audit
         run: composer audit
