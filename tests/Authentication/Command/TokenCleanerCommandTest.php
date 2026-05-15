@@ -12,16 +12,27 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\SchemaTool;
 
 class TokenCleanerCommandTest extends KernelTestCase
-{
-    public function testDeleteUnusedTokens(): void
-    {
+{                                                                                                                   
+    private EntityManagerInterface $em;
+
+    protected function setUp(): void
+    {                                                                                                                                                     
+        parent::setUp();
         self::bootKernel();
-        $container = static::getContainer();
-        /** @var EntityManagerInterface $em */
-        $em = $container->get('doctrine.orm.entity_manager');
-        
+
+        $this->em = static::getContainer()->get('doctrine.orm.entity_manager');                                                                           
+
+        $metadata = $this->em->getMetadataFactory()->getAllMetadata();                                                                                    
+        $schemaTool = new SchemaTool($this->em);
+        $schemaTool->dropSchema($metadata);
+        $schemaTool->createSchema($metadata);                                                                                                             
+    }
+
+    public function testDeleteUnusedTokens(): void
+    {   
         $user1 = new User();
         $user1->setUsername('username1');
         $user1->setPassword('password');
@@ -30,7 +41,7 @@ class TokenCleanerCommandTest extends KernelTestCase
         $user1->setDisplayName('User');
         $user1->setIsActive(false);
 
-        $em->persist($user1);
+        $this->em->persist($user1);
 
         $user2 = new User();
         $user2->setUsername('username2');
@@ -41,7 +52,7 @@ class TokenCleanerCommandTest extends KernelTestCase
         $user2->setIsActive(true);
         $user2->setActivatedAt(new DateTimeImmutable());
 
-        $em->persist($user2);
+        $this->em->persist($user2);
 
         $user3 = new User();
         $user3->setUsername('username3');
@@ -51,7 +62,7 @@ class TokenCleanerCommandTest extends KernelTestCase
         $user3->setDisplayName('User');
         $user3->setIsActive(false);
 
-        $em->persist($user3);
+        $this->em->persist($user3);
 
         $token1 = new TokenVerification();
         $token1->setUser($user1);
@@ -60,7 +71,7 @@ class TokenCleanerCommandTest extends KernelTestCase
         $token1->setIsUsed(false);
         $token1->setToken('abcdef');
 
-        $em->persist($token1);
+        $this->em->persist($token1);
 
         $token2 = new TokenVerification();
         $token2->setUser($user2);
@@ -69,7 +80,7 @@ class TokenCleanerCommandTest extends KernelTestCase
         $token2->setIsUsed(true);
         $token2->setToken('abcdef');
 
-        $em->persist($token2);
+        $this->em->persist($token2);
 
         $token3 = new TokenVerification();
         $token3->setUser($user2);
@@ -78,7 +89,7 @@ class TokenCleanerCommandTest extends KernelTestCase
         $token3->setIsUsed(false);
         $token3->setToken('abcdef');
 
-        $em->persist($token3);
+        $this->em->persist($token3);
 
         $token4 = new TokenVerification();
         $token4->setUser($user2);
@@ -87,7 +98,7 @@ class TokenCleanerCommandTest extends KernelTestCase
         $token4->setIsUsed(false);
         $token4->setToken('abcdef');
 
-        $em->persist($token4);
+        $this->em->persist($token4);
         
         $token5 = new TokenVerification();
         $token5->setUser($user3);
@@ -96,8 +107,8 @@ class TokenCleanerCommandTest extends KernelTestCase
         $token5->setIsUsed(false);
         $token5->setToken('abcdef');
 
-        $em->persist($token5);
-        $em->flush();
+        $this->em->persist($token5);
+        $this->em->flush();
 
         $application = new Application(self::$kernel);
 
