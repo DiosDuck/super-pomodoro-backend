@@ -4,3 +4,7 @@ framework:
       policy: 'token_bucket'
       limit: '%env(int:RATE_LIMITER_LIMIT)%'
       rate: { interval: '%env(RATE_LIMITER_INTERVAL)%', amount: 1 }
+    refresh_token:
+      policy: 'token_bucket'
+      limit: 10
+      rate: { interval: '1 minute', amount: 10 }

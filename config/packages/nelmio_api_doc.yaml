@@ -24,15 +24,19 @@ nelmio_api_doc:
                                             example: password
                     responses:
                         '200':
-                            description: User is logged out
+                            description: User is logged in. A refresh-token cookie is set on the response.
+                            headers:
+                                Set-Cookie:
+                                    schema:
+                                        type: string
+                                        example: refresh_token=<opaque>; Path=/api/auth/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000
+                                    description: HttpOnly Secure SameSite=Strict refresh-token cookie scoped to /api/auth/. Not readable by JS.
                             content:
                                 application/json:
                                     schema:
                                         type: object
                                         properties:
                                             token:
-                                                type: string
-                                            refresh_token:
                                                 type: string
                         '401':
                             description: Invalid credentials
@@ -42,34 +46,42 @@ nelmio_api_doc:
                     summary: Logout use
                     security:
                         - Bearer: []
-                    requestBody:
-                        required: true
-                        content:
-                            application/json:
-                                schema:
-                                    type: object
-                                    properties:
-                                        refresh_token:
-                                            type: string
+                    parameters:
+                        - name: refresh_token
+                          in: cookie
+                          required: true
+                          schema:
+                              type: string
+                          description: HttpOnly refresh-token cookie. Browser-attached automatically; not readable by JS.
                     responses:
                         '200':
-                            description: User is logged out
-            /api/auth/token/refresh:
+                            description: User is logged out; the corresponding refresh-token row is revoked and the cookie is cleared.
+                            headers:
+                                Set-Cookie:
+                                    schema:
+                                        type: string
+                                        example: refresh_token=; Path=/api/auth/; Max-Age=0
+                                    description: Refresh-token cookie cleared.
+            /api/auth/refresh:
                 post:
                     tags: [Authentication]
-                    summary: Refresh the token
-                    requestBody:
-                        required: true
-                        content:
-                            application/json:
-                                schema:
-                                    type: object
-                                    properties:
-                                        refresh_token:
-                                            type: string
+                    summary: Refresh the access token using the HttpOnly refresh-token cookie.
+                    parameters:
+                        - name: refresh_token
+                          in: cookie
+                          required: true
+                          schema:
+                              type: string
+                          description: HttpOnly refresh-token cookie. Browser-attached automatically; not readable by JS.
                     responses:
                         '200':
-                            description: New token generated
+                            description: New access token issued; the refresh-token cookie is rotated.
+                            headers:
+                                Set-Cookie:
+                                    schema:
+                                        type: string
+                                        example: refresh_token=<opaque>; Path=/api/auth/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000
+                                    description: Rotated refresh-token cookie. Replaces the previous one.
                             content:
                                 application/json:
                                     schema:
@@ -77,8 +89,10 @@ nelmio_api_doc:
                                         properties:
                                             token:
                                                 type: string
-                                            refresh_token:
-                                                type: string
+                        '401':
+                            description: Refresh token missing, expired, unknown, or reuse detected. Cookie cleared.
+                        '429':
+                            description: Rate limit exceeded.
         components:
             securitySchemes:
                 Bearer:

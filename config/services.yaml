@@ -6,6 +6,7 @@
 parameters:
     app.frontend_base_url: '%env(string:DEFAULT_URI)%'
     app.health.version_app: '%env(string:VERSION_APP)%'
+    app.refresh_token_ttl: 2592000
 
 services:
     # default configuration for services in *this* file
@@ -15,11 +16,14 @@ services:
         bind:
             $frontendBaseUrl: '%app.frontend_base_url%'
             $versionApp: '%app.health.version_app%'
+            $refreshTokenTtl: '%app.refresh_token_ttl%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    # decorates Lexik's login success handler
+    App\Authentication\Security\AuthenticationSuccessHandler:
+        arguments:
+            $authenticationSuccessHandler: '@lexik_jwt_authentication.handler.authentication_success' 

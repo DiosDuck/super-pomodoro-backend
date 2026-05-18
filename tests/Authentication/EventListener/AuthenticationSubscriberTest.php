@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Authentication\EventListener;
 
 use App\Authentication\Entity\User;
-use App\Authentication\Repository\TokenVerificationRepository;
+use App\Authentication\Repository\RefreshTokenRepository;
 use App\Tests\Utils\Controller\CleanWebTestCase;
 use DateTimeImmutable;
+use Symfony\Component\BrowserKit\Cookie;
 
 class AuthenticationSubscriberTest extends CleanWebTestCase {
     private DateTimeImmutable $dateTimeInitialized;
@@ -51,40 +52,51 @@ class AuthenticationSubscriberTest extends CleanWebTestCase {
     }
 
     // TODO: implement by hand the new refresh token
-    // public function testLogoutRemoveRefreshToken(): void
-    // {
-    //     $tokenVerificationRepository = $this->client->getContainer()->get(TokenVerificationRepository::class);
-    //     $this->client->request(
-    //         'POST',
-    //         '/api/auth/login',
-    //         server: [
-    //             'CONTENT_TYPE' => 'application/json',
-    //         ],
-    //         content: json_encode([
-    //             'username' => 'username',
-    //             'password' => 'password',
-    //         ], JSON_THROW_ON_ERROR)
-    //     );
+    public function testLogoutRemoveRefreshToken(): void
+    {
+        $refreshTokenRepository = $this->client->getContainer()->get(RefreshTokenRepository::class);
+        $this->client->request(
+            'POST',
+            '/api/auth/login',
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+            ],
+            content: json_encode([
+                'username' => 'username',
+                'password' => 'password',
+            ], JSON_THROW_ON_ERROR)
+        );
 
-    //     $this->assertResponseIsSuccessful();
-    //     $token = $this->testAndGetJsonResponse('token');
-    //     $refreshToken = $this->testAndGetJsonResponse('refresh_token');
+        $this->assertResponseIsSuccessful();
+        $token = $this->testAndGetJsonResponse('token');
+        $loginResponse = $this->client->getResponse();                                                                                                          
+        $loginCookies = $loginResponse->headers->getCookies();  
+        $refreshCookie = $loginCookies[0];                                                                                                      
+   
+        $this->client->getCookieJar()->set(
+            new Cookie(                                                                                     
+                $refreshCookie->getName(),                                                                                                                                 
+                $refreshCookie->getValue(),                                                                                                                                  
+                null,                                                                                                                                                        
+                $refreshCookie->getPath(),
+            )
+        );                                                                                                                                                              
 
-    //     $this->assertCount(1, $tokenVerificationRepository->findAll());
+        $allRefreshTokens = $refreshTokenRepository->findAll();
+        $this->assertCount(1, $allRefreshTokens);
+        $this->assertFalse($allRefreshTokens[0]->isRevoked());
 
-    //     $this->client->request(
-    //         'POST',
-    //         '/api/auth/logout',
-    //         server: [
-    //             'CONTENT_TYPE' => 'application/json',
-    //             'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
-    //         ],
-    //         content: json_encode([
-    //             'refreshToken' => $refreshToken,
-    //         ], JSON_THROW_ON_ERROR)
-    //     );
+        $this->client->request(
+            'POST',
+            '/api/auth/logout',
+            server: [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_AUTHORIZATION' => sprintf('Bearer %s', $token),
+            ],
+        );
 
-    //     $this->assertResponseIsSuccessful();
-    //     $this->assertCount(0, $tokenVerificationRepository->findAll());
-    // }
+        $allRefreshTokens = $refreshTokenRepository->findAll();
+        $this->assertCount(1, $allRefreshTokens);
+        $this->assertTrue($allRefreshTokens[0]->isRevoked());
+    }
 }

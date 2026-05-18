@@ -101,7 +101,7 @@ class PasswordChangeControllerTest extends CleanWebTestCase
     public function testResetPasswordTokenSuccess(): void
     {
         /** @var PasswordHasherInterface $tokenHasher */
-        $tokenHasher = $this->client->getContainer()->get('security.password_hasher.token_hasher');
+        $tokenHasher = $this->client->getContainer()->get('security.password_hasher.token_verification_hasher');
 
         $user = new User();
         $user->setEmail('test@example.com');

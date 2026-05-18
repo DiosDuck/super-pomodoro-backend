@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Authentication\EventListener;
 
 use App\Authentication\Entity\User;
-use App\Authentication\Repository\RefreshTokenRepository;
+use App\Authentication\Service\RefreshTokenService;
+use App\Authentication\Utils\Factory\RefreshTokenCookieFactory;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -13,12 +14,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 
-class AuthenticationSubscriber implements EventSubscriberInterface {
+class AuthenticationSubscriber implements EventSubscriberInterface
+{
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly RefreshTokenRepository $refreshTokenRepository,
+        private readonly RefreshTokenService $refreshTokenService,
     ) {}
-    
+
     public static function getSubscribedEvents(): array
     {
         return [
@@ -30,14 +32,15 @@ class AuthenticationSubscriber implements EventSubscriberInterface {
     public function onLogout(LogoutEvent $event): void
     {
         $request = $event->getRequest();
-        $token = json_decode($request->getContent(), true)['refresh_token'] ?? '';
-        $refreshToken = $this->refreshTokenRepository->findOneBy(['refreshToken' => $token]);
-        if ($refreshToken !== null) {
-            $this->entityManager->remove($refreshToken);
-            $this->entityManager->flush();
+        $presentedRefreshToken = $request->cookies->get(RefreshTokenCookieFactory::COOKIE_NAME);
+
+        if (is_string($presentedRefreshToken) && $presentedRefreshToken !== '') {
+            $this->refreshTokenService->revokeRefreshToken($presentedRefreshToken);
         }
 
-        $event->setResponse(new JsonResponse(['message' => 'ok']));
+        $response = new JsonResponse(['message' => 'ok']);
+        $response->headers->clearCookie(RefreshTokenCookieFactory::COOKIE_NAME, RefreshTokenCookieFactory::PATH);
+        $event->setResponse($response);
     }
 
     public function onLoginSuccess(LoginSuccessEvent $event): void

@@ -58,7 +58,7 @@ jobs:
         uses: docker://ghcr.io/ericsizemore/phpunit-coverage-check-action
         with:
           clover_file: 'clover.xml'
-          threshold: 50
+          threshold: 60
 
   php-stan:
     needs: build

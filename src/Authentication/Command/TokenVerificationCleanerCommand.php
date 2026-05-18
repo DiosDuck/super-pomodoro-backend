@@ -12,10 +12,10 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'app:token:cleaner',
-    description: 'Clears all tokens from DB which expired. If there is also unactive users caused by unactive token, they will get removed too'
+    name: 'app:token-verification:cleaner',
+    description: 'Clears all token verifications from DB which expired. If there are also unactive users caused by unactive token verifications, they will get removed too'
 )]
-class TokenCleanerCommand extends Command {
+class TokenVerificationCleanerCommand extends Command {
     public function __construct(
         private TokenVerificationRepository $tokenVerificationRepository,
         private UserRepository $userRepository,

@@ -14,7 +14,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 
-class TokenCleanerCommandTest extends KernelTestCase
+class TokenVerificationCleanerCommandTest extends KernelTestCase
 {                                                                                                                   
     private EntityManagerInterface $em;
 
@@ -112,7 +112,7 @@ class TokenCleanerCommandTest extends KernelTestCase
 
         $application = new Application(self::$kernel);
 
-        $command = $application->find('app:token:cleaner');
+        $command = $application->find('app:token-verification:cleaner');
         $commandTester = new CommandTester($command);
         $commandTester->execute([]);
 

@@ -23,3 +23,7 @@ api_auth_login:
 # logout path
 api_auth_logout:
     path: /api/auth/logout
+
+# refresh path                                                                                                                                                       
+api_auth_token_refresh:                                                                                                                                            
+    path: /api/auth/refresh

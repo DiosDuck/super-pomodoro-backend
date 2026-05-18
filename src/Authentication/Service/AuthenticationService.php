@@ -25,7 +25,7 @@ class AuthenticationService {
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly TokenVerificationRepository $tokenVerificationRepository,
-        #[Target('token_hasher')]
+        #[Target('token_verification_hasher')]
         private readonly PasswordHasherInterface $tokenHasher,
     ) { }
 
