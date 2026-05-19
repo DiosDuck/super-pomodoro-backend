@@ -44,14 +44,14 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $limiter = $this->refreshTokenLimiter->create($request->getClientIp() ?? 'unknown');
-        if (!$limiter->consume()->isAccepted()) {
-            throw new TooManyLoginAttemptsAuthenticationException();
-        }
-
         $presentedRefreshToken = $request->cookies->get(RefreshTokenCookieFactory::COOKIE_NAME);
         if ($presentedRefreshToken === null || $presentedRefreshToken === '') {
             throw new CustomUserMessageAuthenticationException('Missing refresh token.');
+        }
+
+        $limiter = $this->refreshTokenLimiter->create($request->getClientIp() ?? 'unknown');
+        if (!$limiter->consume()->isAccepted()) {
+            throw new TooManyLoginAttemptsAuthenticationException();
         }
 
         try {
@@ -85,6 +85,10 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
+        if ($exception instanceof TooManyLoginAttemptsAuthenticationException) {
+            return new JsonResponse(['message' => 'Too many requests.'], Response::HTTP_TOO_MANY_REQUESTS);
+        }
+
         $response = new JsonResponse(['message' => 'Invalid refresh token.'], Response::HTTP_UNAUTHORIZED);
         $response->headers->clearCookie(RefreshTokenCookieFactory::COOKIE_NAME, RefreshTokenCookieFactory::PATH);
 

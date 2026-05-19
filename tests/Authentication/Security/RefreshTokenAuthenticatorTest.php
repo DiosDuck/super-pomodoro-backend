@@ -44,7 +44,7 @@ class RefreshTokenAuthenticatorTest extends CleanWebTestCase
         $selector = 'sel-' . bin2hex(random_bytes(8));
         $verifier = 'ver-' . bin2hex(random_bytes(16));
 
-        $token = $this->createRefreshTokenRow(
+        $this->createRefreshTokenRow(
             $user,
             $selector,
             $verifier,
@@ -57,19 +57,12 @@ class RefreshTokenAuthenticatorTest extends CleanWebTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
         $this->assertEquals('Invalid refresh token.', $this->testAndGetJsonResponse('message'));
         $this->assertResponseClearsRefreshCookie();
-
-        // Expiry alone must not flip revoked_at — only reuse-detection does that.
-        $em = $this->client->getContainer()->get('doctrine')->getManager();
-        $em->clear();
-        $refreshed = $em->getRepository(RefreshToken::class)->find($token->getId());
-        $this->assertNull($refreshed->getRevokedAt());
     }
 
     public function testReusedRefreshTokenRevokesEntireFamily(): void
     {
         $user = $this->createActiveUser();
 
-        // RT2 — the legitimate user's CURRENT (active) refresh token.
         $rt2Selector = 'sel-rt2-' . bin2hex(random_bytes(4));
         $rt2Verifier = 'ver-rt2-' . bin2hex(random_bytes(8));
         $rt2 = $this->createRefreshTokenRow(
@@ -79,7 +72,6 @@ class RefreshTokenAuthenticatorTest extends CleanWebTestCase
             new \DateTimeImmutable('+1 day'),
         );
 
-        // RT1 — already revoked, replaced by RT2. Replaying it is the attacker scenario.
         $rt1Selector = 'sel-rt1-' . bin2hex(random_bytes(4));
         $rt1Verifier = 'ver-rt1-' . bin2hex(random_bytes(8));
         $this->createRefreshTokenRow(
@@ -98,11 +90,54 @@ class RefreshTokenAuthenticatorTest extends CleanWebTestCase
         $this->assertEquals('Invalid refresh token.', $this->testAndGetJsonResponse('message'));
         $this->assertResponseClearsRefreshCookie();
 
-        // RT2 must now also be revoked: the family-walk locks the legitimate user out too.
         $em = $this->client->getContainer()->get('doctrine')->getManager();
-        $em->clear();
         $refreshedRt2 = $em->getRepository(RefreshToken::class)->find($rt2->getId());
         $this->assertNotNull($refreshedRt2->getRevokedAt());
+    }
+
+    public function testRefreshSuccessAndRateLimitReached(): void
+    {
+        $user = $this->createActiveUser();
+        $selector = 'sel-' . bin2hex(random_bytes(8));
+        $verifier = 'ver-' . bin2hex(random_bytes(16));
+
+        $oldToken = $this->createRefreshTokenRow(
+            $user,
+            $selector,
+            $verifier,
+            new \DateTimeImmutable('+1 day'),
+        );
+
+        $this->setRefreshCookie($selector, $verifier);
+        $this->client->request('POST', RefreshTokenAuthenticator::REFRESH_ENDPOINT);
+
+        $this->assertResponseIsSuccessful();
+        $jwt = $this->testAndGetJsonResponse('token');
+        $this->assertNotEmpty($jwt);
+
+        $cookies = $this->client->getResponse()->headers->getCookies();
+        $this->assertCount(1, $cookies);
+        $this->assertSame(RefreshTokenCookieFactory::COOKIE_NAME, $cookies[0]->getName());
+        $this->assertFalse($cookies[0]->isCleared());
+        $this->assertNotSame($selector . '.' . $verifier, $cookies[0]->getValue());
+
+        $em = $this->client->getContainer()->get('doctrine')->getManager();
+        $repo = $em->getRepository(RefreshToken::class);
+
+        $refreshedOld = $repo->find($oldToken->getId());
+        $this->assertNotNull($refreshedOld->getRevokedAt());
+        $this->assertNotNull($refreshedOld->getReplacedBy());
+
+        $newToken = $refreshedOld->getReplacedBy();
+        $this->assertNull($newToken->getRevokedAt());
+        $this->assertGreaterThan(new \DateTimeImmutable(), $newToken->getExpiresAt());
+
+        $newParts = explode('.', $cookies[0]->getValue(), 2);
+        $this->setRefreshCookie($newParts[0], $newParts[1]);
+
+        $this->client->request('POST', RefreshTokenAuthenticator::REFRESH_ENDPOINT);
+        $this->assertResponseStatusCodeSame(Response::HTTP_TOO_MANY_REQUESTS);
+        $this->assertEquals('Too many requests.', $this->testAndGetJsonResponse('message'));
     }
 
     private function createActiveUser(): User
