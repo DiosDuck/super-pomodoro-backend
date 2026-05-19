@@ -63,7 +63,7 @@ class RefreshTokenAuthenticator extends AbstractAuthenticator
         $request->attributes->set(self::ROTATED_PLAINTEXT_REQUEST_ATTR, $result->plaintext);
 
         return new SelfValidatingPassport(
-            new UserBadge($result->user->getUserIdentifier(), fn () => $result->user)
+            new UserBadge($result->user->getUserIdentifier())
         );
     }
 
