@@ -33,12 +33,12 @@ class SessionSavedRepository extends ServiceEntityRepository
         ;
     }
 
-    public function deleteAllOldSessions(string $oldString = '-8 days'): int
+    public function deleteAllOldSessions(int $days = 8): int
     {
         return $this->createQueryBuilder('s')
             ->delete()
             ->where('s.createdAt <= :createdAt')
-            ->setParameter('createdAt', new DateTimeImmutable($oldString))
+            ->setParameter('createdAt', new DateTimeImmutable("-{$days} days"))
             ->getQuery()
             ->execute()
         ;

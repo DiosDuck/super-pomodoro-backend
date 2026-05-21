@@ -6,6 +6,7 @@ namespace App\Pomodoro\Command;
 
 use App\Pomodoro\Repository\SessionSavedRepository;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -22,11 +23,22 @@ class PomodoroCleanerCommand extends Command
         parent::__construct();
     }
 
-    public function __invoke(OutputInterface $output): int
-    {
+    public function __invoke(
+        OutputInterface $output,
+        #[Option(description: 'Number of days; sessions older than this threshold are deleted (must be 1 or greater)')]
+        string $daysOld = '8',
+    ): int {
+        if (!ctype_digit($daysOld) || (int) $daysOld < 1) {
+            $output->writeln('<error>--days-old must be a positive integer of 1 or greater</error>');
+
+            return Command::FAILURE;
+        }
+
+        $days = (int) $daysOld;
+
         $output->writeln('Starting to delete older sessions');
 
-        $count = $this->sessionSavedRepository->deleteAllOldSessions();
+        $count = $this->sessionSavedRepository->deleteAllOldSessions($days);
         $output->writeln(
             sprintf('%d rows were deleted', $count)
         );
