@@ -33,12 +33,14 @@ class PomodoroCleanerCommandTest extends KernelTestCase
     }
 
     /**
-     * @return iterable<string, array{value: string}>
+     * @return array<string, array{value: string}>
      */
-    public static function invalidDaysOldProvider(): iterable
+    public static function invalidDaysOldProvider(): array
     {
-        yield 'non-digit value' => ['value' => 'abc'];
-        yield 'negative int value' => ['value' => '-5'];
+        return [
+            'non-digit value' => ['value' => 'abc'],
+            'negative int value' => ['value' => '-5'],
+        ];
     }
 
     #[DataProvider('invalidDaysOldProvider')]
@@ -55,21 +57,23 @@ class PomodoroCleanerCommandTest extends KernelTestCase
     }
 
     /**
-     * @return iterable<string, array{args: array<string, string>, expectedDeleted: int}>
+     * @return array<string, array{args: array<string, string>, expectedDeleted: int}>
      */
-    public static function deletionProvider(): iterable
+    public static function deletionProvider(): array
     {
-        yield 'default cutoff (8 days)' => [
-            'args' => [],
-            'expectedDeleted' => 2,
-        ];
-        yield 'custom 3 day cutoff' => [
-            'args' => ['--days-old' => '3'],
-            'expectedDeleted' => 3,
-        ];
-        yield 'custom 15 day cutoff' => [
-            'args' => ['--days-old' => '15'],
-            'expectedDeleted' => 1,
+        return [
+            'default cutoff (8 days)' => [
+                'args' => [],
+                'expectedDeleted' => 2,
+            ],
+            'custom 3 day cutoff' => [
+                'args' => ['--days-old' => '3'],
+                'expectedDeleted' => 3,
+            ],
+            'custom 15 day cutoff' => [
+                'args' => ['--days-old' => '15'],
+                'expectedDeleted' => 1,
+            ],
         ];
     }
 

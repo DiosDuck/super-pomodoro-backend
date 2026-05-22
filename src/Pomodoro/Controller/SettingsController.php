@@ -87,11 +87,13 @@ class SettingsController extends AbstractController {
         description: 'User not signed in',
     )]
     #[OA\Response(
-        response: 422,
+        response: 400,
         description: 'Bad format',
     )]
     public function createSettings(
-        #[MapRequestPayload] SettingsDTO $settingsDTO,
+        #[MapRequestPayload(
+            validationFailedStatusCode: JsonResponse::HTTP_BAD_REQUEST,
+        )] SettingsDTO $settingsDTO,
         EntityManagerInterface $entityManager,
         #[CurrentUser] ?User $user,
     ): JsonResponse {
@@ -99,13 +101,6 @@ class SettingsController extends AbstractController {
             return $this->json(
                 ['message' => 'User not logged in'],
                 JsonResponse::HTTP_UNAUTHORIZED,
-            );
-        }
-
-        if (!$settingsDTO->isValid()) {
-            return $this->json(
-                ['message' => 'Bad format'],
-                JsonResponse::HTTP_UNPROCESSABLE_ENTITY,
             );
         }
 
@@ -145,11 +140,13 @@ class SettingsController extends AbstractController {
         description: 'Settings not found',
     )]
     #[OA\Response(
-        response: 422,
+        response: 400,
         description: 'Bad format',
     )]
     public function updateSettings(
-        #[MapRequestPayload] SettingsDTO $settingsDTO,
+        #[MapRequestPayload(
+            validationFailedStatusCode: JsonResponse::HTTP_BAD_REQUEST,
+        )] SettingsDTO $settingsDTO,
         SettingsRepository $settingRepository,
         EntityManagerInterface $entityManager,
         #[CurrentUser] ?User $user,
@@ -158,13 +155,6 @@ class SettingsController extends AbstractController {
             return $this->json(
                 ['message' => 'User not logged in'],
                 JsonResponse::HTTP_UNAUTHORIZED,
-            );
-        }
-
-        if (!$settingsDTO->isValid()) {
-            return $this->json(
-                ['message' => 'Bad format'],
-                JsonResponse::HTTP_UNPROCESSABLE_ENTITY,
             );
         }
 

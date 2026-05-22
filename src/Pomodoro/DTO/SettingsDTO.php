@@ -6,7 +6,8 @@ namespace App\Pomodoro\DTO;
 
 use App\Pomodoro\Entity\Settings;
 use OpenApi\Attributes as OA;
-use Symfony\Component\Serializer\Attribute\Ignore;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[OA\Schema(
     title: 'Pomodoro Settings Schema',
@@ -14,28 +15,42 @@ use Symfony\Component\Serializer\Attribute\Ignore;
 )]
 class SettingsDTO {
     public function __construct(
-        #[OA\Property(type: 'number', example: 25.0)]
-        public float $workTime,
-        #[OA\Property(type: 'number', example: 5.0)]
-        public float $shortBreakTime,
-        #[OA\Property(type: 'number', example: 15.0)]
-        public float $longBreakTime,
+        #[Assert\Positive]
+        #[OA\Property(type: 'integer', example: 1500)]
+        public int $workTimeSeconds,
+        #[Assert\Positive]
+        #[OA\Property(type: 'integer', example: 300)]
+        public int $shortBreakTimeSeconds,
+        #[Assert\Positive]
+        #[OA\Property(type: 'integer', example: 900)]
+        public int $longBreakTimeSeconds,
+        #[Assert\Positive]
         #[OA\Property(type: 'integer', example: 4)]
         public int $cyclesBeforeLongBreak,
-        #[OA\Property(type: 'number', example: 1.0)]
-        public float $maxConfirmationTime,
+        #[OA\Property(type: 'integer', example: 60)]
+        public int $maxConfirmationTimeSeconds,
         #[OA\Property(type: 'boolean', example: true)]
         public bool $enableWaiting,
     ) {}
 
+    #[Assert\Callback]
+    public function validateMaxConfirmation(ExecutionContextInterface $context): void
+    {
+        if ($this->enableWaiting && $this->maxConfirmationTimeSeconds <= 0) {
+            $context->buildViolation('maxConfirmationTimeSeconds must be positive when enableWaiting is true.')
+                ->atPath('maxConfirmationTimeSeconds')
+                ->addViolation();
+        }
+    }
+
     public static function fromSettings(Settings $settings): self
     {
         return new SettingsDTO(
-            workTime: $settings->getWorkTime() / 60,
-            shortBreakTime: $settings->getShortBreakTime() / 60,
-            longBreakTime: $settings->getLongBreakTime() / 60,
+            workTimeSeconds: $settings->getWorkTime(),
+            shortBreakTimeSeconds: $settings->getShortBreakTime(),
+            longBreakTimeSeconds: $settings->getLongBreakTime(),
             cyclesBeforeLongBreak: $settings->getCyclesBeforeLongBreak(),
-            maxConfirmationTime: $settings->getMaxConfirmationTime() / 60,
+            maxConfirmationTimeSeconds: $settings->getMaxConfirmationTime(),
             enableWaiting: $settings->getEnableWaiting(),
         );
     }
@@ -46,27 +61,13 @@ class SettingsDTO {
             $settings = new Settings();
         }
 
-        $settings->setWorkTime(intval($this->workTime * 60));
-        $settings->setShortBreakTime(intval($this->shortBreakTime * 60));
-        $settings->setLongBreakTime(intval($this->longBreakTime * 60));
+        $settings->setWorkTime($this->workTimeSeconds);
+        $settings->setShortBreakTime($this->shortBreakTimeSeconds);
+        $settings->setLongBreakTime($this->longBreakTimeSeconds);
         $settings->setCyclesBeforeLongBreak($this->cyclesBeforeLongBreak);
-        $settings->setMaxConfirmationTime(intval($this->maxConfirmationTime * 60));
+        $settings->setMaxConfirmationTime($this->maxConfirmationTimeSeconds);
         $settings->setEnableWaiting($this->enableWaiting);
 
         return $settings;
-    }
-
-    #[Ignore]
-    public function isValid(): bool
-    {
-        return $this->workTime > 0
-            && $this->shortBreakTime > 0
-            && $this->longBreakTime > 0
-            && $this->cyclesBeforeLongBreak > 0
-            && (
-                $this->maxConfirmationTime > 0 ||
-                $this->enableWaiting === false
-            )
-        ;
     }
 }
