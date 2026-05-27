@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Pomodoro\Controller;
 
 use App\Authentication\Entity\User;
+use App\Pomodoro\DTO\SaveWorkSessionRequest;
 use App\Pomodoro\DTO\SessionHistoryDailyDTO;
 use App\Pomodoro\Entity\SessionSaved;
 use App\Pomodoro\Service\WorkSessionService;
@@ -13,11 +14,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpKernel\Attribute\MapQueryParameter;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 
 #[Route(path: '/api/pomodoro/session', name: 'session_')]
 class WorkSessionController extends AbstractController {
@@ -31,15 +32,9 @@ class WorkSessionController extends AbstractController {
         tags: ['Pomodoro Session'],
     )]
     #[OA\RequestBody(
+        required: true,
         content: new OA\JsonContent(
-            properties: [
-                new OA\Property(
-                    property: 'workTime',
-                    description: 'seconds',
-                    type: 'number',
-                    example: 1500,
-                ),
-            ]
+            ref: new Model(type: SaveWorkSessionRequest::class)
         )
     )]
     #[OA\Response(
@@ -56,9 +51,10 @@ class WorkSessionController extends AbstractController {
     )]
     public function saveWorkSession(
         #[CurrentUser] ?User $user,
+        #[MapRequestPayload(validationFailedStatusCode: JsonResponse::HTTP_BAD_REQUEST)]
+        SaveWorkSessionRequest $payload,
         WorkSessionService $workSessionService,
         EntityManagerInterface $entityManager,
-        Request $request,
     ): JsonResponse
     {
         if (null === $user) {
@@ -68,10 +64,7 @@ class WorkSessionController extends AbstractController {
             );
         }
 
-        $workTimeVal = json_decode($request->getContent(), true)['workTime'] ?? 0;
-        $workTime = intval($workTimeVal);
-
-        if (!$workSessionService->isNewWorkSessionValid($user, $workTime)) {
+        if (!$workSessionService->isNewWorkSessionValid($user, $payload->workTime)) {
             return $this->json(
                 ['message' => 'Bad Request'],
                 JsonResponse::HTTP_BAD_REQUEST
@@ -80,7 +73,7 @@ class WorkSessionController extends AbstractController {
 
         $sessionSaved = new SessionSaved();
         $sessionSaved->setUser($user)
-            ->setWorkTime($workTime)
+            ->setWorkTime($payload->workTime)
             ->setCreatedAt(new DateTimeImmutable())
         ;
 
@@ -122,7 +115,8 @@ class WorkSessionController extends AbstractController {
     )]
     public function getWorkSessionHistory(
         #[CurrentUser] ?User $user,
-        #[MapQueryParameter] int $timestamp,
+        #[MapQueryParameter(validationFailedStatusCode: JsonResponse::HTTP_BAD_REQUEST)]
+        int $timestamp,
         WorkSessionService $workSessionService,
     ): JsonResponse
     {

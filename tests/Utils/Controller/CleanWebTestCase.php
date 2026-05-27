@@ -6,6 +6,7 @@ namespace App\Tests\Utils\Controller;
 
 use App\Authentication\Entity\User;
 use App\Authentication\Repository\UserRepository;
+use DateTimeImmutable;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,7 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class CleanWebTestCase extends WebTestCase
+abstract class CleanWebTestCase extends WebTestCase
 {
     protected KernelBrowser $client;
 
@@ -51,6 +52,20 @@ class CleanWebTestCase extends WebTestCase
 
         self::ensureKernelShutdown();
         parent::tearDown();
+    }
+
+    protected function createUser(): User
+    {
+        $user = new User();
+        $user->setEmail('user@email.com');
+        $user->setUsername('username');
+        $user->setRoles(['ROLE_USER']);
+        $user->setActivatedAt(new DateTimeImmutable());
+        $user->setDisplayName('Username');
+        $user->setIsActive(true);
+        $user->setPassword('password');
+
+        return $this->saveUser($user);
     }
 
     protected function saveUser(User $user): User

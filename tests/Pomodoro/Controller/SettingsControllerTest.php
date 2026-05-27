@@ -8,7 +8,6 @@ use App\Authentication\Entity\User;
 use App\Pomodoro\Entity\Settings;
 use App\Pomodoro\Repository\SettingsRepository;
 use App\Tests\Utils\Controller\CleanWebTestCase;
-use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\Response;
 
 class SettingsControllerTest extends CleanWebTestCase
@@ -204,20 +203,6 @@ class SettingsControllerTest extends CleanWebTestCase
         $this->assertSame(5, $stored->getCyclesBeforeLongBreak());
         $this->assertSame(0, $stored->getMaxConfirmationTime());
         $this->assertFalse($stored->getEnableWaiting());
-    }
-
-    private function createUser(): User
-    {
-        $user = new User();
-        $user->setEmail('user@email.com');
-        $user->setUsername('username');
-        $user->setRoles(['ROLE_USER']);
-        $user->setActivatedAt(new DateTimeImmutable());
-        $user->setDisplayName('Username');
-        $user->setIsActive(true);
-        $user->setPassword('password');
-
-        return $this->saveUser($user);
     }
 
     private function createSettings(User $user): Settings
