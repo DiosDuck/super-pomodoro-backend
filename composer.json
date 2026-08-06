@@ -4,22 +4,22 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "doctrine/dbal": "^3.10.4",
-        "doctrine/doctrine-bundle": "^2.18.2",
+        "doctrine/dbal": "^3.10.6",
+        "doctrine/doctrine-bundle": "^2.19.0",
         "doctrine/doctrine-migrations-bundle": "^3.7",
-        "doctrine/orm": "^3.6.1",
+        "doctrine/orm": "^3.6.8",
         "lexik/jwt-authentication-bundle": "^3.2",
-        "nelmio/api-doc-bundle": "^5.9.2",
-        "phpdocumentor/reflection-docblock": "^5.6.6",
-        "phpstan/phpdoc-parser": "^2.3.2",
+        "nelmio/api-doc-bundle": "^5.11.0",
+        "phpdocumentor/reflection-docblock": "^5.6.7",
+        "phpstan/phpdoc-parser": "^2.3.3",
         "symfony/asset": "7.4.*",
         "symfony/brevo-mailer": "7.4.*",
         "symfony/console": "7.4.*",
         "symfony/dotenv": "7.4.*",
-        "symfony/flex": "^2.10",
+        "symfony/flex": "^2.11",
         "symfony/framework-bundle": "7.4.*",
         "symfony/mailer": "7.4.*",
         "symfony/messenger": "7.4.*",
@@ -92,11 +92,11 @@
         }
     },
     "require-dev": {
-        "phpstan/phpstan": "^2.1",
-        "phpstan/phpstan-doctrine": "^2.0",
-        "phpunit/phpunit": "^11.5.50",
+        "phpstan/phpstan": "^2.2.8",
+        "phpstan/phpstan-doctrine": "^2.0.28",
+        "phpunit/phpunit": "^11.5.56",
         "symfony/browser-kit": "7.4.*",
         "symfony/css-selector": "7.4.*",
-        "symfony/maker-bundle": "^1.65.1"
+        "symfony/maker-bundle": "^1.67.0"
     }
 }
