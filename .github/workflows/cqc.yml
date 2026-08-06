@@ -59,11 +59,12 @@ jobs:
       - name: PHPUnit
         run: composer phpunit
 
-      - name: Code Coverage
-        uses: docker://ghcr.io/ericsizemore/phpunit-coverage-check-action
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v5
         with:
-          clover_file: 'clover.xml'
-          threshold: 90
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          verbose: true
 
   php-stan:
     needs: build
