@@ -10,7 +10,7 @@
         "doctrine/dbal": "^3.10.6",
         "doctrine/doctrine-bundle": "^2.19.0",
         "doctrine/doctrine-migrations-bundle": "^3.7",
-        "doctrine/orm": "^3.6.8",
+        "doctrine/orm": "3.6.7",
         "lexik/jwt-authentication-bundle": "^3.2",
         "nelmio/api-doc-bundle": "^5.11.0",
         "phpdocumentor/reflection-docblock": "^5.6.7",
